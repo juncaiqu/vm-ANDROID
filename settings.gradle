@@ -1,0 +1,1 @@
+include ':vmCore',':vmInstall', ':vmUpgrade', ':vmUtils', ':vmBrower', ':vmCmdService', ':vmFileManager'

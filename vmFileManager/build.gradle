@@ -1,0 +1,51 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 15
+
+
+
+    defaultConfig {
+        applicationId "com.kdx.vmfilemanager"
+        minSdkVersion 9
+        targetSdkVersion 15
+        versionCode 1
+        versionName "v1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+
+    signingConfigs {
+        config {
+            keyPassword 'kdx2018'
+            storeFile file('../kdx_android.jks')
+            storePassword 'kdx2018'
+            keyAlias 'kdx_android'
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.config
+        }
+        debug {
+            signingConfig signingConfigs.config
+        }
+    }
+    applicationVariants.all { variant ->
+        variant.getPackageApplication().outputDirectory = new File(project.rootDir.absolutePath + "/build/apks/release")
+        variant.getPackageApplication().outputScope.apkDatas.forEach { apkData ->
+            apkData.outputFileName = "vmFileManager_"+
+                    variant.versionName + "_" +variant.buildType.name +
+                    ".apk"
+        }
+
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation project(':vmUtils')
+}

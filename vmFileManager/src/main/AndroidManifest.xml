@@ -1,0 +1,18 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.kdx.filemanager"
+    android:sharedUserId="vm.uid.kdx"
+    >
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name">
+        <receiver android:name="com.kdx.filemanager.UpdateReceiver">
+            <intent-filter>
+                <action android:name="com.kdx.update" />
+            </intent-filter>
+        </receiver>
+        <service android:name="com.kdx.filemanager.FileService"></service>
+
+    </application>
+</manifest>

@@ -1,0 +1,1 @@
+am broadcast -a com.kdx.MODE_SWITCH --ei state 1

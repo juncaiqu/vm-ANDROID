@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">vmCore</string>
+    <string name="key_1">1</string>
+    <string name="key_2">2</string>
+    <string name="key_3">3</string>
+    <string name="key_4">4</string>
+    <string name="key_5">5</string>
+    <string name="key_6">6</string>
+    <string name="key_7">7</string>
+    <string name="key_8">8</string>
+    <string name="key_9">9</string>
+    <string name="key_0">0</string>
+    <string name="key_clear">清除</string>
+    <string name="key_del">删除</string>
+    <string name="key_confirm">确定</string>
+    <string name="save">保存</string>
+    <string name="keymap_hint">请输入当前售货机ID</string>
+    <string name="to_setting">>>>>>>进入系统设置>>>>>>></string>
+
+    <string name="dialog_confirm">确认</string>
+    <string name="dialog_cancel">取消</string>
+
+    <string name="mf_state_info">状态信息</string>
+    <string name="mf_maintain_tools">运维工具</string>
+    <string name="mf_reboot">重启</string>
+    <string name="mf_update">刷新</string>
+    
+    <string name="tools_item_bak">数据备份</string>
+    <string name="tools_item_copy">数据拷贝(将U盘resouce中内容，拷贝至工控)</string>
+    <string name="tools_item_configure">重新配置</string>
+    <string name="tools_item_verinfo">版本信息</string>
+    <string name="tools_item_setting">系统设置(谨慎操作,后果自负)</string>
+    <string name="tools_item_nettest">网络测试</string>
+    <string name="tools_item_otherset">其它设置</string>
+    <string name="tools_item_rebootpro">重启售货机程序</string>
+
+    <string name="state_item_vmidInfo">售货机编号</string>
+    <string name="state_item_simInfo">运营商</string>
+    <string name="state_item_signalInfo">信号强度</string>
+    <string name="state_item_serialInfo">工控标示</string>
+    <string name="state_item_vmType">机器类型</string>
+    <string name="state_item_imgType">镜像类型</string>
+    <string name="state_item_sdcardInfo">sd卡容量</string>
+    <string name="state_item_cpuInfo">cpu占用</string>
+    <string name="state_item_memoryInfo">内存占用</string>
+</resources>
