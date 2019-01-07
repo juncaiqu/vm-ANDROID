@@ -17,9 +17,9 @@ public class LogManaRunnable implements Runnable{
 		public void run() {
 			bakLog();
 			delLogbak();
-			//emmc中保存的log
-			Tool.delFile(new File(KdxFileUtil.getLogsDir()), 20 * 24 * 60 * 60000L);//20天
-			// 定时清除uboxservice中断点续传遗留的文件
+
+			Tool.delFile(new File(KdxFileUtil.getLogsDir()), 3 * 24 * 60 * 60000L);//20天
+			// 定时清除断点续传遗留的文件
 			Tool.delFile(new File(KdxFileUtil.getTempDir()) ,10 * 24 * 60 * 60000);//10天
 		}
 		public synchronized void bakLog(){
@@ -47,7 +47,7 @@ public class LogManaRunnable implements Runnable{
 									destCal.set(Calendar.MINUTE, 0);
 									destCal.set(Calendar.SECOND, 0);
 									destCal.set(Calendar.MILLISECOND, 0);
-									destCal.add(Calendar.DAY_OF_YEAR, -6);
+									destCal.add(Calendar.DAY_OF_YEAR, -1);
 									Date destDate = destCal.getTime();
 									
 									return destDate.after(lastModiftime);

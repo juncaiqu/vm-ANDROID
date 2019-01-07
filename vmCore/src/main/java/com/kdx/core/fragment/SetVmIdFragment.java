@@ -12,6 +12,8 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -370,21 +372,24 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
             }
             try {
                 publishProgress("\n配置机器号为:"+vmId+",机型:"+vmType);
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getApksDir()));
+                /*FileUtil.deleteDirectory(new File(KdxFileUtil.getApksDir()));
                 FileUtil.deleteDirectory(new File(KdxFileUtil.getAppsDir()));
                 FileUtil.deleteDirectory(new File(KdxFileUtil.getConfigDir()));
                 FileUtil.deleteDirectory(new File(KdxFileUtil.getCoreDir()));
                 FileUtil.deleteDirectory(new File(KdxFileUtil.getDataDir()));
                 FileUtil.deleteDirectory(new File(KdxFileUtil.getLibsDir()));
                 FileUtil.deleteDirectory(new File(KdxFileUtil.getUpdateDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getResourceDir()));
-                publishProgress("\n正在从U盘复制镜像");
-                FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH, KdxFileUtil.getRootDir());
-                PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMID, vmId);
-                String oldVmidConfig = "{\"innerCode\":\""+vmId+"\"}";
-                FileUtil.writeFile(KdxFileUtil.getConfigDir()+"VmBaseInfo.json",oldVmidConfig);
-                PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMTYPE, String.valueOf(vmType));
-
+                FileUtil.deleteDirectory(new File(KdxFileUtil.getResourceDir()));*/
+                File[] arr_vmDir = new File(KdxFileUtil.getRootDir()).listFiles();
+                for(File file_vmDir:arr_vmDir){
+                    if(!TextUtils.equals(new File(KdxFileUtil.getLogsDir()).getAbsolutePath(),file_vmDir.getAbsolutePath()) && !TextUtils.equals(new File(KdxFileUtil.getLogsbakDir()).getAbsolutePath(),file_vmDir.getAbsolutePath())){
+                        Log.i("core","if:"+file_vmDir.getAbsolutePath());
+                        FileUtil.deleteDirectory(file_vmDir);
+                    }else{
+                        Log.i("core","else:"+file_vmDir.getAbsolutePath());
+                    }
+                }
+                FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH+"apks/", KdxFileUtil.getApksDir());
                 File apks = new File(KdxFileUtil.getApksDir());
                 if(!apks.exists() || !apks.isDirectory()){
                     return false;
@@ -400,6 +405,14 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
                         return false;
                     }
                 }
+                publishProgress("\n正在从U盘复制镜像");
+                FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH, KdxFileUtil.getRootDir());
+                PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMID, vmId);
+                String oldVmidConfig = "{\"innerCode\":\""+vmId+"\"}";
+                FileUtil.writeFile(KdxFileUtil.getConfigDir()+"VmBaseInfo.json",oldVmidConfig);
+                PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMTYPE, String.valueOf(vmType));
+
+
                 publishProgress("\n安装完成");
                 publishProgress("\n正在进入售卖模式");
                 SystemClock.sleep(1000*5);
@@ -411,6 +424,7 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
+                publishProgress("\n错误信息:"+e.toString());
                 result = false;
             }
             return result;

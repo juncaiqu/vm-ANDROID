@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 
+import com.kdx.core.exception.CoreExceptionHandler;
 import com.kdx.core.logger.LoggerSetting;
 import com.kdx.core.utils.ContextUtil;
 import com.kdx.kdxutils.config.ActionConfig;
@@ -48,6 +49,7 @@ public class WatchDogService extends Service {
             }
         };
         timer.schedule(task_watchDog, 0, 60 * 1000);
+        Thread.setDefaultUncaughtExceptionHandler(new CoreExceptionHandler());
     }
 
     @Override

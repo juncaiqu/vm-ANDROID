@@ -22,6 +22,10 @@ public class KdxFileUtil {
     private static final String kdx_updateDir = kdx_rootDir + "update/";
     private static final String kdx_coreDir = kdx_rootDir + "core/";
 
+    /**
+     *
+     * @return /mnt/sdcard/vm/
+     */
     public static String getRootDir() {
         File dir = new File(kdx_rootDir);
         if (!dir.exists()) {

@@ -29,7 +29,7 @@ public class FileUtil {
             return false;
         }
     }
-    public static void copyDirectiory(String sourceDir, String targetDir) {
+    public static void copyDirectiory(String sourceDir, String targetDir) throws Exception {
         File sorce = new File(sourceDir);
         if (!sorce.exists()) {
             return;
@@ -55,7 +55,7 @@ public class FileUtil {
         }
 
     }
-    public static void copyFile(File sourcefile, File targetFile) {
+    public static void copyFile(File sourcefile, File targetFile) throws Exception {
         FileInputStream input = null;
         BufferedInputStream inbuff = null;
         FileOutputStream out = null;
@@ -72,8 +72,9 @@ public class FileUtil {
             }
             outbuff.flush();
 
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
+            throw e;
         }finally {
             try {if(inbuff != null){inbuff.close();} } catch (IOException e) { e.printStackTrace();}
             try {if(outbuff != null){outbuff.close();} } catch (IOException e) { e.printStackTrace();}
@@ -145,7 +146,7 @@ public class FileUtil {
         } else {
             File[] files = directory.listFiles();
             if(files == null) {
-                throw new IOException("Failed to list contents of " + directory);
+                throw new IOException("Failed to list contents of " + directory.getPath());
             } else {
                 IOException exception = null;
                 File[] arr$ = files;
@@ -168,8 +169,9 @@ public class FileUtil {
         }
     }
     public static float readUsage() {
+        RandomAccessFile reader = null;
         try {
-            RandomAccessFile reader = new RandomAccessFile("/proc/stat", "r");
+            reader = new RandomAccessFile("/proc/stat", "r");
             String load = reader.readLine();
             String[] toks = load.split(" ");
             long idle1 = Long.parseLong(toks[5]);
@@ -184,7 +186,6 @@ public class FileUtil {
             }
             reader.seek(0);
             load = reader.readLine();
-            reader.close();
             toks = load.split(" ");
 
             long idle2 = Long.parseLong(toks[5]);
@@ -196,6 +197,14 @@ public class FileUtil {
 
         } catch (IOException ex) {
             ex.printStackTrace();
+        }finally {
+           if(reader != null){
+               try {
+                   reader.close();
+               } catch (IOException e) {
+                   e.printStackTrace();
+               }
+           }
         }
         return 0;
     }
@@ -207,9 +216,10 @@ public class FileUtil {
     public static String readFile(String path) {
         StringBuffer content = new StringBuffer();
         File file = new File(path);
+        BufferedReader br = null;
         if (file.exists()&&file.isFile()) {
             try {
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+                br = new BufferedReader(new InputStreamReader(new FileInputStream(path)));
                 String data = br.readLine();
                 while (data != null) {
                     content.append(data);
@@ -217,6 +227,14 @@ public class FileUtil {
                 }
                 br.close();
             } catch (IOException e) {
+            }finally {
+                if(br != null){
+                    try {
+                        br.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
         }
         return content + "";

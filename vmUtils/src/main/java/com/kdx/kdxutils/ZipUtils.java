@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Enumeration;
 import java.util.List;
@@ -57,7 +58,7 @@ public class ZipUtils {
 			zipFile(resFile, zipout, "");
 			Log.i("zip_result", "zipFiles finish ");
 			tempZipFile.renameTo(new File(zipFilePath));
-			zipout.close();
+
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 			return false;
@@ -65,7 +66,13 @@ public class ZipUtils {
 			e.printStackTrace();
 			return false;
 		}finally {
-
+			if(zipout != null){
+				try {
+					zipout.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		return true;
 	}
@@ -85,8 +92,10 @@ public class ZipUtils {
 		System.out.println("unZipFile start");
 		byte[] buf = new byte[512];
 		int readedBytes;
+		InputStream inputStream = null;
+		FileOutputStream fileOut = null;
 		try {
-			FileOutputStream fileOut;
+
 			File folder = new File(folderPath);
 			if (!folder.exists()) {
 				boolean mkResult = folder.mkdirs();
@@ -94,7 +103,7 @@ public class ZipUtils {
 					return false;
 				}
 			}
-			InputStream inputStream;
+
 			ZipFile zipFile = new ZipFile(zipFileName);
 
 			Log.i("zip_result", "unZipfile == " + zipFileName);
@@ -116,8 +125,7 @@ public class ZipUtils {
 					while ((readedBytes = inputStream.read(buf)) > 0) {
 						fileOut.write(buf, 0, readedBytes);
 					}
-					fileOut.close();
-					inputStream.close();
+
 				}
 			}
 			zipFile.close();
@@ -129,6 +137,9 @@ public class ZipUtils {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			return false;
+		}finally {
+			FileUtil.closeIn(inputStream);
+			FileUtil.closeOut(fileOut);
 		}
 
 		return true;
@@ -149,16 +160,11 @@ public class ZipUtils {
 	 *             当压缩过程出错时抛出
 	 */
 	private static void zipFile(File resFile, ZipOutputStream zipout,
-			String rootpath) throws IOException {
+			String rootpath) throws UnsupportedEncodingException {
 		rootpath = rootpath
 				+ (rootpath.trim().length() == 0 ? "" : File.separator)
 				+ resFile.getName();
 		rootpath = new String(rootpath.getBytes("8859_1"), "GB2312");
-
-		Log.i("zip_result",
-				"zipFile -- resFile.getAbsolutePath() = "
-						+ resFile.getAbsolutePath() + "---rootpath = "
-						+ rootpath);
 
 		if (resFile.isDirectory()) {
 			File[] fileList = resFile.listFiles();
@@ -168,72 +174,33 @@ public class ZipUtils {
 			Log.i("zip_result", "zipFile -- finish");
 		} else {
 			byte buffer[] = new byte[BUFF_SIZE];
-			BufferedInputStream in = new BufferedInputStream(
-					new FileInputStream(resFile), BUFF_SIZE);
-			zipout.putNextEntry(new ZipEntry(rootpath));
-			int realLength;
-			while ((realLength = in.read(buffer)) != -1) {
-				zipout.write(buffer, 0, realLength);
+			BufferedInputStream in = null;
+			try {
+				in = new BufferedInputStream(new FileInputStream(resFile), BUFF_SIZE);
+				zipout.putNextEntry(new ZipEntry(rootpath));
+				int realLength;
+				while ((realLength = in.read(buffer)) != -1) {
+					zipout.write(buffer, 0, realLength);
+				}
+				zipout.flush();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}finally {
+				FileUtil.closeIn(in);
+				if(zipout != null){
+					try {
+						zipout.closeEntry();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+
 			}
-			in.close();
-			zipout.flush();
-			zipout.closeEntry();
+
+
 		}
 	}
 
-	public static byte[] getBytes(InputStream is) throws Exception {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		byte[] buffer = new byte[1024];
-		int len = 0;
-		while ((len = is.read(buffer)) != -1) {
-			bos.write(buffer, 0, len);
-		}
-		is.close();
-		bos.flush();
-		byte[] result = bos.toByteArray();
-		return result;
-	}
-
-	/**
-	 * 
-	 * @param files
-	 *            要压缩的文件集合
-	 * @param zipFilePath
-	 *            生成zip文件的绝对路径
-	 * @return
-	 */
-	public static File zipFiles(List<File> files, String zipFilePath) {
-		File tempZipFile = null;
-		try {
-			tempZipFile = new File(zipFilePath);
-			byte[] buf = new byte[1024];
-			// ZipOutputStream类：完成文件或文件夹的压缩
-			ZipOutputStream out = new ZipOutputStream(new FileOutputStream(
-					tempZipFile));
-			for (int i = 0; i < files.size(); i++) {
-				zipFile(files.get(i), out, "");
-			}
-			out.close();
-			System.out.println("压缩完成.");
-		} catch (Exception e) {
-			e.printStackTrace();
-			StringBuffer sb = new StringBuffer();
-	        Writer writer = new StringWriter();
-	        PrintWriter pw = new PrintWriter(writer);
-	        e.printStackTrace(pw);
-	       
-	        Throwable cause = e.getCause();
-	        while (cause != null) {
-	                cause.printStackTrace(pw);
-	                cause = cause.getCause();
-	        }
-	        pw.close();
-	        String result = writer.toString();
-	        sb.append(result);
-//	        System.out.println("mUncaughtExceptionHandler ---- ex === " + sb);
-		}
-		return tempZipFile;
-	}
 
 
 }

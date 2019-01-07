@@ -24,6 +24,9 @@ private static Logger logger = LoggerSetting.getLogger();
         if(TextUtils.equals(intent.getAction(), ActionConfig.B_LAUNCHER_BOOT)){
             Intent vmService = new Intent(context, VmService.class);
             context.startService(vmService);
+        }else if(TextUtils.equals(intent.getAction(), ActionConfig.B_LAUNCHER_STOP)){
+            Intent vmService = new Intent(context, VmService.class);
+            context.stopService(vmService);
         }
     }
 }

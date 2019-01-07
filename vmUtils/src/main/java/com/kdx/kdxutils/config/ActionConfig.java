@@ -15,6 +15,10 @@ public class ActionConfig {
      */
     public static final String B_LAUNCHER_BOOT = "com.kdx.launcher.BOOT";
     /**
+     * launcher启动广播
+     */
+    public static final String B_LAUNCHER_STOP = "com.kdx.launcher.STOP";
+    /**
      * 维护模式切换广播
      */
     public static final String B_MODE_SWITCH = "com.kdx.MODE_SWITCH";

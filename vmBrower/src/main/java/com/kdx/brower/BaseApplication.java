@@ -4,6 +4,7 @@ import android.app.Application;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.kdx.brower.exception.MyExceptionHandler;
 import com.kdx.brower.logger.LoggerSetting;
 
 import org.apache.logging.log4j.Logger;
@@ -22,7 +23,7 @@ public class BaseApplication extends Application {
         mMainThreadHandler = new Handler();
         mMainLooper = getMainLooper();
         mInstance = this;
-        Thread.setDefaultUncaughtExceptionHandler(mUncaughtExceptionHandler);
+        Thread.setDefaultUncaughtExceptionHandler(new MyExceptionHandler());
        
     }
     public static Handler getMainThreadHandler() {
@@ -32,14 +33,7 @@ public class BaseApplication extends Application {
     public static Looper getMainThreadLooper() {
         return mMainLooper;
     }
-    private Thread.UncaughtExceptionHandler mUncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
-        @Override
-        public void uncaughtException(Thread thread, Throwable ex) {
 
-            logger.error(ex);
-            System.exit(-1);
-        }
-    };
     public static BaseApplication getApplication() {
         return mInstance;
     }

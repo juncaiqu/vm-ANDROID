@@ -1,16 +1,15 @@
-package com.kdx.core.exception;
+package com.kdx.cmdservice.exception;
+
+import com.kdx.cmdservice.logger.LoggerSetting;
+import com.kdx.kdxutils.ExceptionUtil;
 
 import java.lang.Thread.UncaughtExceptionHandler;
 
-import com.kdx.core.logger.LoggerSetting;
-import com.kdx.kdxutils.ExceptionUtil;
 
-
-public class CoreExceptionHandler implements UncaughtExceptionHandler {
+public class MyExceptionHandler implements UncaughtExceptionHandler {
     private static org.apache.logging.log4j.Logger logger = LoggerSetting.getLogger();
 
-    public CoreExceptionHandler() {
-
+    public MyExceptionHandler() {
     }
     
     /**

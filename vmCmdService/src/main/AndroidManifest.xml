@@ -22,6 +22,7 @@
         <receiver android:name="com.kdx.cmdservice.CmdBroadcastReceiver">
             <intent-filter>
                 <action android:name="com.kdx.launcher.BOOT" />
+                <action android:name="com.kdx.launcher.STOP" />
             </intent-filter>
         </receiver>
         <service android:name="com.kdx.cmdservice.VmService"></service>

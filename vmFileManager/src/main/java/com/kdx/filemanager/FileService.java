@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.kdx.filemanager.exception.MyExceptionHandler;
 import com.kdx.kdxutils.LocalThreadPoolExecutor;
 
 
@@ -16,6 +17,12 @@ public class FileService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        Thread.setDefaultUncaughtExceptionHandler(new MyExceptionHandler());
     }
 
     @Override

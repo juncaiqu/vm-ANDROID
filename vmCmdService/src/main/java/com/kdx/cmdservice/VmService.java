@@ -6,6 +6,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import com.kdx.cmdservice.exception.MyExceptionHandler;
 import com.kdx.cmdservice.logger.LoggerSetting;
 import com.kdx.kdxutils.LocalThreadPoolExecutor;
 
@@ -33,8 +34,12 @@ public class VmService extends Service {
         super.onCreate();
         logger.info("VmService.onCreate");
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        Notification builder = new Notification.Builder(this).setTicker("").setSmallIcon(R.drawable.ic_launcher).getNotification();
-        startForeground(1, builder);
+        Notification builder = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.HONEYCOMB) {
+            builder = new Notification.Builder(this).setTicker("").setSmallIcon(R.drawable.ic_launcher).getNotification();
+            startForeground(1, builder);
+        }
+
         LocalThreadPoolExecutor.getInstance().submit(new Runnable() {
             @Override
             public void run() {
@@ -42,13 +47,15 @@ public class VmService extends Service {
                 CmdMain.getSingleton().start(getApplicationContext());
             }
         });
+        Thread.setDefaultUncaughtExceptionHandler(new MyExceptionHandler());
     }
 
 
     @Override
     public void onDestroy() {
         logger.info("VmService.onDestroy");
-        super.onDestroy();
         CmdMain.getSingleton().close();
+        super.onDestroy();
+
     }
 }
