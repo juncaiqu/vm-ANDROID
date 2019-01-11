@@ -1,11 +1,9 @@
 package com.kdx.filemanager;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.util.Calendar;
 import java.util.Date;
 
-import android.util.Log;
 
 import com.kdx.filemanager.utils.Tool;
 import com.kdx.kdxutils.KdxFileUtil;
@@ -17,95 +15,87 @@ public class LogManaRunnable implements Runnable{
 		public void run() {
 			bakLog();
 			delLogbak();
-
-			Tool.delFile(new File(KdxFileUtil.getLogsDir()), 3 * 24 * 60 * 60000L);//20天
-			// 定时清除断点续传遗留的文件
 			Tool.delFile(new File(KdxFileUtil.getTempDir()) ,10 * 24 * 60 * 60000);//10天
 		}
-		public synchronized void bakLog(){
+		private synchronized void bakLog(){
 			File logFile = new File(KdxFileUtil.getLogsDir());
-			if(logFile.isDirectory()){
-				File[] listFiles = logFile.listFiles();
-				for(File listFile:listFiles){
-					Log.i("qujc", listFile.getPath());
-					if(listFile.isDirectory()){
-						File[] logFiles = listFile.listFiles(new FileFilter() {
-							@Override
-							public boolean accept(File pathname) {
-								try {
-									Calendar lastModifCal = Calendar.getInstance();
-									lastModifCal.setTime(new Date(pathname.lastModified()));
-									lastModifCal.set(Calendar.HOUR_OF_DAY, 0);
-									lastModifCal.set(Calendar.MINUTE, 0);
-									lastModifCal.set(Calendar.SECOND, 0);
-									lastModifCal.set(Calendar.MILLISECOND, 0);
-									Date lastModiftime = lastModifCal.getTime();
-									//-----------------------------------------
-									
-									Calendar destCal = Calendar.getInstance();
-									destCal.set(Calendar.HOUR_OF_DAY, 0);
-									destCal.set(Calendar.MINUTE, 0);
-									destCal.set(Calendar.SECOND, 0);
-									destCal.set(Calendar.MILLISECOND, 0);
-									destCal.add(Calendar.DAY_OF_YEAR, -1);
-									Date destDate = destCal.getTime();
-									
-									return destDate.after(lastModiftime);
-								} catch (Exception e) {
-									return false;
-								}
-							}
-						});
-						for(File log:logFiles){
-							ZipUtils.zipFiles(log.getPath(), KdxFileUtil.getLogsbakDir()+listFile.getName()+"/"+log.getName().replace(".log", ".zip"));
-						}
-					}
-					
-				}
-					
-			}
+			bakLog(logFile);
 		}
-		public synchronized void delLogbak(){
+		private synchronized void delLogbak(){
 			File logFile = new File(KdxFileUtil.getLogsbakDir());
-			if(logFile.isDirectory()){
-				File[] listFiles = logFile.listFiles();
-				for(File listFile:listFiles){
-					Log.i("qujc", listFile.getPath());
-					if(listFile.isDirectory()){
-						File[] logFiles = listFile.listFiles(new FileFilter() {
-							@Override
-							public boolean accept(File pathname) {
-								try {
-									Calendar lastModifCal = Calendar.getInstance();
-									lastModifCal.setTime(new Date(pathname.lastModified()));
-									lastModifCal.set(Calendar.HOUR_OF_DAY, 0);
-									lastModifCal.set(Calendar.MINUTE, 0);
-									lastModifCal.set(Calendar.SECOND, 0);
-									lastModifCal.set(Calendar.MILLISECOND, 0);
-									Date lastModiftime = lastModifCal.getTime();
-									
-									Calendar destCal = Calendar.getInstance();
-									destCal.set(Calendar.HOUR_OF_DAY, 0);
-									destCal.set(Calendar.MINUTE, 0);
-									destCal.set(Calendar.SECOND, 0);
-									destCal.set(Calendar.MILLISECOND, 0);
-									destCal.add(Calendar.DAY_OF_YEAR, -365);
-									Date destDate = destCal.getTime();
-									
-									return destDate.after(lastModiftime);
-								} catch (Exception e) {
-									return false;
-								}
-							}
-						});
-						for(File log:logFiles){
-							Log.i("qujc",log.getName());
-							log.delete();
+			delLogbak(logFile);
+		}
+
+		private void bakLog(File logFile){
+			if(logFile.exists()){
+				if(logFile.isDirectory()){
+					File[] files = logFile.listFiles();
+					for(File file:files){
+						bakLog(file);
+					}
+				}else{
+					Calendar lastModifCal = Calendar.getInstance();
+					lastModifCal.setTime(new Date(logFile.lastModified()));
+					lastModifCal.set(Calendar.HOUR_OF_DAY, 0);
+					lastModifCal.set(Calendar.MINUTE, 0);
+					lastModifCal.set(Calendar.SECOND, 0);
+					lastModifCal.set(Calendar.MILLISECOND, 0);
+					Date lastModiftime = lastModifCal.getTime();
+					//-----------------------------------------
+
+					Calendar destCal = Calendar.getInstance();
+					destCal.set(Calendar.HOUR_OF_DAY, 0);
+					destCal.set(Calendar.MINUTE, 0);
+					destCal.set(Calendar.SECOND, 0);
+					destCal.set(Calendar.MILLISECOND, 0);
+					destCal.add(Calendar.DAY_OF_YEAR, -5);
+					Date destDate = destCal.getTime();
+
+					if(destDate.after(lastModiftime)){
+						String str_logPath = logFile.getAbsolutePath();
+						int index = logFile.getAbsolutePath().indexOf(KdxFileUtil.getLogsDir())+KdxFileUtil.getLogsDir().length();
+						int lastIndexOf = logFile.getAbsolutePath().lastIndexOf(".");
+						String lastLog = str_logPath.substring(index,lastIndexOf);
+						File bakLogFile = new File(KdxFileUtil.getLogsbakDir()+lastLog+".zip");
+						boolean iszip = ZipUtils.zipFiles(logFile.getAbsolutePath(),bakLogFile.getAbsolutePath());
+						if(iszip){
+							logFile.delete();
 						}
 					}
-					
 				}
-					
+			}
+
+		}
+	private void delLogbak(File logFile){
+		if(logFile.exists()){
+			if(logFile.isDirectory()){
+				File[] files = logFile.listFiles();
+				for(File file:files){
+					delLogbak(file);
+				}
+			}else{
+				Calendar lastModifCal = Calendar.getInstance();
+				lastModifCal.setTime(new Date(logFile.lastModified()));
+				lastModifCal.set(Calendar.HOUR_OF_DAY, 0);
+				lastModifCal.set(Calendar.MINUTE, 0);
+				lastModifCal.set(Calendar.SECOND, 0);
+				lastModifCal.set(Calendar.MILLISECOND, 0);
+				Date lastModiftime = lastModifCal.getTime();
+				//-----------------------------------------
+
+				Calendar destCal = Calendar.getInstance();
+				destCal.set(Calendar.HOUR_OF_DAY, 0);
+				destCal.set(Calendar.MINUTE, 0);
+				destCal.set(Calendar.SECOND, 0);
+				destCal.set(Calendar.MILLISECOND, 0);
+				destCal.add(Calendar.DAY_OF_YEAR, -90);
+				Date destDate = destCal.getTime();
+
+				if(destDate.after(lastModiftime)){
+					logFile.delete();
+				}
 			}
 		}
+
+	}
 } 

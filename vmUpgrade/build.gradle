@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 22
+    compileSdkVersion 15
 
 
 
     defaultConfig {
         applicationId "com.kdx.upgrade"
-        minSdkVersion 15
-        targetSdkVersion 22
+        minSdkVersion 9
+        targetSdkVersion 15
         versionCode 1
         versionName "1.0"
 

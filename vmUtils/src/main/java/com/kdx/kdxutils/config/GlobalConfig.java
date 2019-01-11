@@ -9,7 +9,7 @@ import com.kdx.kdxutils.PropertiesUtil;
  * Email   :qjchzq@163.com
  */
 public class GlobalConfig {
-    public static final String LOCALCONFIG_PATH = KdxFileUtil.getConfigDir()+"/local.properties";
+    public static final String LOCALCONFIG_PATH = KdxFileUtil.getConfigDir()+"local.properties";
     public static final String LOCAL_KEY_VMID = "vmId";
     public static final String LOCAL_KEY_ISINSTALL = "isInstall";
     public static final String LOCAL_ISINSTALL_YES = "yes";

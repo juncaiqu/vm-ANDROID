@@ -1,6 +1,7 @@
 package com.kdx.kdxutils;
 
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -70,6 +71,7 @@ public class PropertiesUtil {
         if (TextUtils.isEmpty(fileName) || TextUtils.isEmpty(key) || TextUtils.isEmpty(value)) {
             throw new RuntimeException("setConfigValue(String fileName, String key, value) parm can not null");
         }
+        Log.i("utils",fileName+"start");
         File file = new File(fileName);
         Properties prop = new Properties();
         FileOutputStream os = null;
@@ -86,6 +88,7 @@ public class PropertiesUtil {
             prop.setProperty(key, value);
             os = new FileOutputStream(file);
             prop.store(os, "");
+            Log.i("utils",fileName+"end");
         } finally {
             try {
                 if (os != null) {

@@ -68,7 +68,7 @@ public class NativeMethod {
 			return intent;
 		}
 		while (data.keys().hasNext()){
-            String keyName = data.keys().next();
+            String keyName = (String) data.keys().next();
             Object value = data.get(keyName);
             if(toBoolean(value)!=null){
                 intent.putExtra(keyName,data.optBoolean(keyName));

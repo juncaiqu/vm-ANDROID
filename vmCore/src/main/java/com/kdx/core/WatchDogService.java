@@ -40,10 +40,10 @@ public class WatchDogService extends Service {
         task_watchDog = new TimerTask() {
             @Override
             public void run() {
-                logger.info("send B_WATCHDOG_FEED");
                 ContextUtil.sendBroadCast(getApplicationContext(), ActionConfig.B_WATCHDOG_FEED);
-                if ((step++ % 120) == 0) {
+                if ((step % 120) == 0) {
                     logger.info("send update");
+                    step++;
                     ContextUtil.sendBroadCast(getApplicationContext(), ActionConfig.B_KDX_UPDATE);
                 }
             }

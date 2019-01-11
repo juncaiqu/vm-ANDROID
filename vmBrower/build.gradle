@@ -5,11 +5,11 @@ repositories {
     }
 }
 android {
-    compileSdkVersion 21
+    compileSdkVersion 15
     defaultConfig {
         applicationId "com.kdx.brower"
         minSdkVersion 14
-        targetSdkVersion 21
+        targetSdkVersion 15
         versionCode 1
         versionName "v1.0"
         javaCompileOptions.annotationProcessorOptions.includeCompileClasspath = true
@@ -48,6 +48,6 @@ android {
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
-    implementation(name:'xwalk_core_library', ext:'aar')
+    implementation(name:'xwalk_core_library-release', ext:'aar')
     implementation project(':vmUtils')
 }

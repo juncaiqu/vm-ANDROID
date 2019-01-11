@@ -407,6 +407,7 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
                 }
                 publishProgress("\n正在从U盘复制镜像");
                 FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH, KdxFileUtil.getRootDir());
+                publishProgress("\n配置文件更新");
                 PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMID, vmId);
                 String oldVmidConfig = "{\"innerCode\":\""+vmId+"\"}";
                 FileUtil.writeFile(KdxFileUtil.getConfigDir()+"VmBaseInfo.json",oldVmidConfig);
