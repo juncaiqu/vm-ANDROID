@@ -62,7 +62,7 @@ public class MaintainFragment extends AbsFragment implements View.OnClickListene
     private static Logger logger = LoggerSetting.getLogger();
     private static final int STA_MAINTAIN_TOOLS = 0x00;
     private static final int STA_STATE_INFO = 0x01;
-    private int currentSta = STA_STATE_INFO;
+    private int currentSta = STA_MAINTAIN_TOOLS;
     private Button bt_maintain_tools;
     private Button bt_state_info;
     private ListView lv_content;
@@ -159,7 +159,12 @@ public class MaintainFragment extends AbsFragment implements View.OnClickListene
         toolsMap.put(MaintainType.tools_item_otherset, new StateInfo(getActivity().getString(R.string.tools_item_otherset), null, MaintainType.tools_item_otherset));
         toolsList = new ArrayList<StateInfo>(toolsMap.values());
         Collections.sort(toolsList);
-        maintainAdapter = new MaintainAdapter(stateInfoList, getActivity().getApplicationContext());
+        maintainAdapter = new MaintainAdapter(getActivity().getApplicationContext());
+        if(currentSta == STA_STATE_INFO){
+            maintainAdapter.setDateList(stateInfoList);
+        }else{
+            maintainAdapter.setDateList(toolsList);
+        }
         lv_content.setAdapter(maintainAdapter);
         lv_content.setOnItemClickListener(this);
         telManager.listen(new PhoneStateListener() {

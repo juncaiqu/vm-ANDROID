@@ -80,7 +80,6 @@ public class PropertiesUtil {
             if (file.exists() && file.isFile()) {
                 fis = new FileInputStream(file);
                 prop.load(fis);
-                fis.close();// 关闭资源
             } else {
                 file.getParentFile().mkdirs();
                 file.createNewFile();

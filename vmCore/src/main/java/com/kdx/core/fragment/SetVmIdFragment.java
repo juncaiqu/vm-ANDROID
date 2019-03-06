@@ -34,17 +34,22 @@ import com.kdx.core.net.protocal.tokcs.Ack;
 import com.kdx.core.net.protocal.tokcs.InnerCodeReq;
 import com.kdx.core.net.protocal.tovm.InnerCodeRpt;
 import com.kdx.core.utils.BitMapTool;
+import com.kdx.core.utils.ContextUtil;
 import com.kdx.core.utils.JsonUtil;
 import com.kdx.core.utils.ToastUtils;
 import com.kdx.kdxutils.FileUtil;
 import com.kdx.kdxutils.KdxFileUtil;
+import com.kdx.kdxutils.LocalThreadPoolExecutor;
 import com.kdx.kdxutils.MD5Utils;
 import com.kdx.kdxutils.NetUtil;
 import com.kdx.kdxutils.PropertiesUtil;
+import com.kdx.kdxutils.ZipUtils;
 import com.kdx.kdxutils.config.GlobalConfig;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -66,20 +71,7 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
     private AlertDialog alertDialog = null;
 
 
-    private EditText et_vmid = null;
-    private Button bt_key_0 = null;
-    private Button bt_key_1 = null;
-    private Button bt_key_2 = null;
-    private Button bt_key_3 = null;
-    private Button bt_key_4 = null;
-    private Button bt_key_5 = null;
-    private Button bt_key_6 = null;
-    private Button bt_key_7 = null;
-    private Button bt_key_8 = null;
-    private Button bt_key_9 = null;
-    private Button bt_key_del = null;
-    private Button bt_key_clear = null;
-    private Button bt_key_confirm = null;
+
     private Handler handler = new Handler();
     private ScrollView sv_show;
     private LinearLayout ll_layout;
@@ -93,11 +85,10 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
         view.setLayoutParams(rl);
         findView(view);
         initView();
-        progressDialog = new ProgressDialog(getActivity());
-        socketCommunication = SocketCommunication.getSocketCommunication();
-        socketCommunication.setCommunicationHandler(this);
         logger.info("SetVmIdFragment onCreateView");
-        processStartConnect();
+        RestoreFactoryAsyncTask rfat = new RestoreFactoryAsyncTask();
+        rfat.execute();
+
         return view;
     }
 
@@ -109,21 +100,7 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
     }
 
     private void findView(View view) {
-        et_vmid = (EditText) view.findViewById(R.id.et_vmid);
-        bt_key_0 = (Button) view.findViewById(R.id.bt_key_0);
-        bt_key_1 = (Button) view.findViewById(R.id.bt_key_1);
-        bt_key_2 = (Button) view.findViewById(R.id.bt_key_2);
-        bt_key_3 = (Button) view.findViewById(R.id.bt_key_3);
-        bt_key_4 = (Button) view.findViewById(R.id.bt_key_4);
-        bt_key_5 = (Button) view.findViewById(R.id.bt_key_5);
-        bt_key_6 = (Button) view.findViewById(R.id.bt_key_6);
-        bt_key_7 = (Button) view.findViewById(R.id.bt_key_7);
-        bt_key_8 = (Button) view.findViewById(R.id.bt_key_8);
-        bt_key_9 = (Button) view.findViewById(R.id.bt_key_9);
-        bt_key_del = (Button) view.findViewById(R.id.bt_key_del);
-        bt_key_clear = (Button) view.findViewById(R.id.bt_key_clear);
-        bt_key_confirm = (Button) view.findViewById(R.id.bt_key_confirm);
-        et_vmid = (EditText) view.findViewById(R.id.et_vmid);
+
         iv_qr = (ImageView) view.findViewById(R.id.iv_qr);
         tv_state_info = (TextView) view.findViewById(R.id.tv_state_info);
         bt_refresh = (Button) view.findViewById(R.id.bt_refresh);
@@ -133,22 +110,12 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
     }
 
     private void initView() {
-        bt_key_0.setOnClickListener(this);
-        bt_key_1.setOnClickListener(this);
-        bt_key_2.setOnClickListener(this);
-        bt_key_3.setOnClickListener(this);
-        bt_key_4.setOnClickListener(this);
-        bt_key_5.setOnClickListener(this);
-        bt_key_6.setOnClickListener(this);
-        bt_key_7.setOnClickListener(this);
-        bt_key_8.setOnClickListener(this);
-        bt_key_9.setOnClickListener(this);
-        bt_key_del.setOnClickListener(this);
-        bt_key_clear.setOnClickListener(this);
-        bt_key_confirm.setOnClickListener(this);
         bt_refresh.setOnClickListener(this);
         tv_tosetting.setOnClickListener(this);
         ll_layout.setOnClickListener(this);
+        progressDialog = new ProgressDialog(getActivity());
+        socketCommunication = SocketCommunication.getSocketCommunication();
+        socketCommunication.setCommunicationHandler(this);
     }
     // 需要点击几次 就设置几
     long [] mHits = null;
@@ -175,54 +142,15 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
         }
         lastClickTime = System.currentTimeMillis();
         switch (v.getId()) {
-            case R.id.bt_key_0:
-            case R.id.bt_key_1:
-            case R.id.bt_key_2:
-            case R.id.bt_key_3:
-            case R.id.bt_key_4:
-            case R.id.bt_key_5:
-            case R.id.bt_key_6:
-            case R.id.bt_key_7:
-            case R.id.bt_key_8:
-            case R.id.bt_key_9:
-                et_vmid.getText().append(((Button) v).getText().toString());
-                if (et_vmid.getText().length() >= 10) {
-                    ToastUtils.getInstanc(getActivity().getApplicationContext()).showToast("机器号长度不能大于10位");
-                }
-                break;
-            case R.id.bt_key_clear:
-                et_vmid.getText().clear();
-                break;
+
             case R.id.bt_refresh:
                 processStartConnect();
                 break;
             case R.id.ll_layout:
                 onDisplaySettingButton();
                 break;
-            case R.id.bt_key_del:
-                if (et_vmid.getText().length() > 0) {
-                    et_vmid.getText().delete(et_vmid.getText().length() - 1, et_vmid.getText().length());
-                }
-                break;
             case R.id.tv_tosetting:
                 intoSetting();
-                break;
-            case R.id.bt_key_confirm:
-                if (et_vmid.getText().length() < 1) {
-                    ToastUtils.getInstanc(getActivity().getApplicationContext()).showToast("请输入机器号");
-                    return;
-                }
-                boolean isInstallUpan = FileUtil.fileExits(GlobalConfig.UPAN_PATH);
-                if (!isInstallUpan) {
-                    ToastUtils.getInstanc(getActivity().getApplicationContext()).showToast("请插入U盘");
-                    return;
-                }
-                boolean isInstallVM = FileUtil.fileExits(GlobalConfig.VM_UPAN_PATH);
-                if (!isInstallVM) {
-                    ToastUtils.getInstanc(getActivity().getApplicationContext()).showToast("请确认U盘中镜像目录是否存在");
-                    return;
-                }
-                createDialog(et_vmid.getText().toString());
                 break;
         }
     }
@@ -231,9 +159,6 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
         i.setComponent(new ComponentName("com.android.settings", "com.android.settings.Settings"));
         this.getActivity().startActivity(i);
     }
-
-
-
 
     @Override
     public void msgArrived(SocketCommunication socketCommunication,String msg) {
@@ -271,18 +196,7 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
 
     private  void processStartConnect(){
         setText("正在进行初始化....");
-        boolean isInstallUpan = FileUtil.fileExits(GlobalConfig.UPAN_PATH);
-        if (!isInstallUpan) {
-            appendText("\n未检测到U盘，请插入U盘!!!!");
-            dismissDialog(progressDialog);
-            return;
-        }
-        boolean isInstallVM = FileUtil.fileExits(GlobalConfig.VM_UPAN_PATH);
-        if (!isInstallVM) {
-            appendText("\n未检测到U盘镜像，请确认U盘中镜像目录是否存在vm目录!!!!");
-            dismissDialog(progressDialog);
-            return;
-        }
+        dismissDialog(progressDialog);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置进度条的形式为圆形转动的进度条
         progressDialog.setCancelable(false);
         progressDialog.setCanceledOnTouchOutside(false);
@@ -372,28 +286,18 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
             }
             try {
                 publishProgress("\n配置机器号为:"+vmId+",机型:"+vmType);
-                /*FileUtil.deleteDirectory(new File(KdxFileUtil.getApksDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getAppsDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getConfigDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getCoreDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getDataDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getLibsDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getUpdateDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getResourceDir()));*/
-                File[] arr_vmDir = new File(KdxFileUtil.getRootDir()).listFiles();
-                for(File file_vmDir:arr_vmDir){
-                    if(!TextUtils.equals(new File(KdxFileUtil.getLogsDir()).getAbsolutePath(),file_vmDir.getAbsolutePath()) && !TextUtils.equals(new File(KdxFileUtil.getLogsbakDir()).getAbsolutePath(),file_vmDir.getAbsolutePath())){
-                        Log.i("core","if:"+file_vmDir.getAbsolutePath());
-                        FileUtil.deleteDirectory(file_vmDir);
-                    }else{
-                        Log.i("core","else:"+file_vmDir.getAbsolutePath());
+                boolean isInstallVM = FileUtil.fileExits(GlobalConfig.VM_UPAN_PATH);
+                if(isInstallVM){
+                    publishProgress("\n正在从U盘复制镜像....");
+                    FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH, KdxFileUtil.getRootDir());
+                }else{
+                    publishProgress("\n正在从本地解压镜像....");
+                    boolean isUnzip = ZipUtils.unZipFile(CoreConfig.vmImagePath,"/mnt/sdcard/vm/");
+                    if(!isUnzip){
+                        return false;
                     }
                 }
-                FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH+"apks/", KdxFileUtil.getApksDir());
                 File apks = new File(KdxFileUtil.getApksDir());
-                if(!apks.exists() || !apks.isDirectory()){
-                    return false;
-                }
                 File[] listFile = apks.listFiles();
                 publishProgress("\n开始安装程序,共"+listFile.length+"个");
                 int prog = 1;
@@ -405,15 +309,11 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
                         return false;
                     }
                 }
-                publishProgress("\n正在从U盘复制镜像");
-                FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH, KdxFileUtil.getRootDir());
                 publishProgress("\n配置文件更新");
                 PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMID, vmId);
                 String oldVmidConfig = "{\"innerCode\":\""+vmId+"\"}";
                 FileUtil.writeFile(KdxFileUtil.getConfigDir()+"VmBaseInfo.json",oldVmidConfig);
                 PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMTYPE, String.valueOf(vmType));
-
-
                 publishProgress("\n安装完成");
                 publishProgress("\n正在进入售卖模式");
                 SystemClock.sleep(1000*5);
@@ -454,12 +354,66 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
             } else {
                 appendText("\n初始化机器出现错误,请重试");
             }
+        }
+    }
+    private class RestoreFactoryAsyncTask extends AsyncTask<Void, String, Boolean> {
 
+        public RestoreFactoryAsyncTask() {
+        }
+        @Override
+        protected void onPreExecute() {
+            setText("正在进行初始化....");
+            dismissDialog(progressDialog);
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置进度条的形式为圆形转动的进度条
+            progressDialog.setCancelable(false);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setIcon(R.mipmap.ic_launcher);
+            progressDialog.setTitle("提示");
+            progressDialog.setMessage("正在进行初始化");
+            progressDialog.show();
+        }
+        @Override
+        protected Boolean doInBackground(Void... voids) {
+           try {
+               List<String> pageNames = ContextUtil.queryFilterAppInfo(getActivity().getApplicationContext());
+               for(String pageName:pageNames){
+                   if(pageName.startsWith("com.kdx")){
+                       if(!TextUtils.equals(pageName,"com.kdx.core") && !TextUtils.equals(pageName,"com.kdx.install")){
+                           CoreActivity coreActivity = (CoreActivity) getActivity();
+                           boolean isUninstall = coreActivity.unInstall(pageName);
+                           publishProgress("\n卸载程序:"+pageName+(isUninstall?" 成功":" 失败"));
+                       }
+                   }
+               }
+               File[] arr_vmDir = new File(KdxFileUtil.getRootDir()).listFiles();
+               for(File file_vmDir:arr_vmDir){
+                   if(!TextUtils.equals(new File(KdxFileUtil.getLogsDir()).getAbsolutePath(),file_vmDir.getAbsolutePath()) && !TextUtils.equals(new File(KdxFileUtil.getLogsbakDir()).getAbsolutePath(),file_vmDir.getAbsolutePath())){
+                       Log.i("core","if:"+file_vmDir.getAbsolutePath());
+                       FileUtil.deleteDirectory(file_vmDir);
+                   }else{
+                       Log.i("core","else:"+file_vmDir.getAbsolutePath());
+                   }
+               }
+           }catch (Exception e){
+               e.printStackTrace();
+               onProgressUpdate("\n恢复出厂状态出错:"+e.toString());
+               return false;
+           }
+
+            return true;
         }
 
         @Override
-        protected void onPreExecute() {
+        protected void onProgressUpdate(String... para){
+            appendText(para[0]);
+        }
 
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if(result){
+                appendText("\n开始连接服务器...");
+                socketCommunication.start();
+            }
         }
     }
     private void dismissDialog(Dialog dialog){
@@ -471,98 +425,7 @@ public class SetVmIdFragment extends AbsFragment implements View.OnClickListener
         super(TARGET);
     }
     /**-----------------------------------------------------------------*/
-    private void createDialog(final String vmId) {
-        if (alertDialog == null || !alertDialog.isShowing()) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setIcon(R.mipmap.ic_launcher);
-            builder.setTitle("设置提醒");
-            builder.setMessage("当前设置的售货机编号为 : " + vmId);
-            builder.setCancelable(false);
 
-
-            builder.setPositiveButton(R.string.dialog_confirm,
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface arg0, int arg1) {
-                            alertDialog.dismiss();
-                            FileAsyncTask fileAsyncTask = new FileAsyncTask(vmId);
-                            fileAsyncTask.execute();
-                        }
-                    });
-
-            builder.setNegativeButton(R.string.dialog_cancel,
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface d, int which) {
-                            alertDialog.dismiss();
-                        }
-                    });
-            alertDialog = builder.create();
-            alertDialog.setCanceledOnTouchOutside(false);
-            alertDialog.show();
-        }
-    }
-    private class FileAsyncTask extends AsyncTask<Void, Void, Boolean> {
-        private ProgressDialog dialog = null;
-        private String vmId = null;
-
-        public FileAsyncTask(String vmId) {
-            this.vmId = vmId;
-            dialog = new ProgressDialog(getActivity());
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            boolean result = true;
-            try {
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getApksDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getAppsDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getConfigDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getCoreDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getDataDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getLibsDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getUpdateDir()));
-                FileUtil.deleteDirectory(new File(KdxFileUtil.getResourceDir()));
-                FileUtil.copyDirectiory(GlobalConfig.VM_UPAN_PATH, KdxFileUtil.getRootDir());
-                PropertiesUtil.setConfigValue(GlobalConfig.LOCALCONFIG_PATH, GlobalConfig.LOCAL_KEY_VMID, vmId);
-
-                int prog = 1;
-                while (prog < 50) {
-                    SystemClock.sleep(100);
-                    prog++;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-                result = false;
-            }
-            return result;
-        }
-
-        @Override
-        protected void onPostExecute(Boolean result) {
-            dialog.dismiss();
-            if (result) {
-                CoreActivity coreActivity = (CoreActivity) getActivity();
-                coreActivity.toVmTypeView();
-            } else {
-                ToastUtils.getInstanc(getActivity().getApplicationContext()).showToast("配置机器号出现错误");
-            }
-
-        }
-
-        @Override
-        protected void onPreExecute() {
-            dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);// 设置进度条的形式为圆形转动的进度条
-            dialog.setCancelable(false);
-            dialog.setCanceledOnTouchOutside(false);
-            dialog.setIcon(R.mipmap.ic_launcher);
-            dialog.setTitle("提示");
-            dialog.setMessage("正在从U盘中拷贝镜像文件");
-            dialog.show();
-        }
-
-
-    }
 
     @Override
     public void onDestroy() {

@@ -49,7 +49,6 @@ public class WatchDogService extends Service {
             }
         };
         timer.schedule(task_watchDog, 0, 60 * 1000);
-        Thread.setDefaultUncaughtExceptionHandler(new CoreExceptionHandler());
     }
 
     @Override

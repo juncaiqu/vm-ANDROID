@@ -58,7 +58,6 @@ public class FileUtil {
 
     }
     public static void copyFile(File sourcefile, File targetFile) throws Exception {
-        Log.i("core",sourcefile.getAbsolutePath()+" : "+targetFile.getAbsolutePath());
         FileInputStream input = null;
         BufferedInputStream inbuff = null;
         FileOutputStream out = null;

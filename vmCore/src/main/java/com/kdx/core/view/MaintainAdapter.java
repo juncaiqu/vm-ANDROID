@@ -19,8 +19,7 @@ public class MaintainAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater mInflater;
 
-    public MaintainAdapter(List<StateInfo> dateList, Context context) {
-		this.dateList = dateList;
+    public MaintainAdapter( Context context) {
 		this.context = context;
 		mInflater = LayoutInflater.from(context);
 	}
